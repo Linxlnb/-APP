@@ -11,14 +11,12 @@
     <div class="banner-wrap">
       <div class="swiper-container" ref="swiper-container">
         <div class="swiper-wrapper">
-          <div class="swiper-slide">
-            <img src="//vueshop.glbuys.com/uploadfiles/1484285302.jpg" alt="" />
-          </div>
-          <div class="swiper-slide">
-            <img src="//vueshop.glbuys.com/uploadfiles/1484285334.jpg" alt="" />
-          </div>
-          <div class="swiper-slide">
-            <img src="//vueshop.glbuys.com/uploadfiles/1524206455.jpg" alt="" />
+          <div
+            class="swiper-slide"
+            v-for="(item, index) in swipers"
+            :key="index"
+          >
+            <img :src="item.image" alt="" />
           </div>
         </div>
         <div class="swiper-pagination" ref="swiper-pagination"></div>
@@ -337,6 +335,7 @@
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex'
 import Swiper from '../../../assets/js/libs/swiper'
 export default {
   name: 'index',
@@ -348,16 +347,31 @@ export default {
   created() {
     this.isScroll = true
     window.addEventListener('scroll', this.eventScrollTop)
+    this.getSwiper({
+      success: () => {
+        this.$nextTick(() => {
+          new Swiper(this.$refs['swiper-container'], {
+            autoplay: 3000,
+            pagination: this.$refs['swiper-pagination'],
+            paginationClickable: true,
+            autoplayDisableOnInteraction: false
+          })
+        })
+      }
+    })
   },
-  mounted() {
-    new Swiper(this.$refs['swiper-container'], {
-      autoplay: 3000,
-      pagination: this.$refs['swiper-pagination'],
-      paginationClickable: true,
-      autoplayDisableOnInteraction: false
+  //有关DOM操作放在mounted()里面
+  mounted() {},
+  computed: {
+    ...mapState({
+      swipers: state => state.index.swipers
     })
   },
   methods: {
+    ...mapActions({
+      getSwiper: 'index/getSwiper'
+    }),
+
     eventScrollTop() {
       let scrollTop =
         document.body.scrollTop || document.documentElement.scrollTop
@@ -376,7 +390,7 @@ export default {
       }
     }
   },
-
+  //当我们离开这个页面的时候，便会调用这个函数
   destroyed() {
     window.removeEventListener('scroll', this.eventScrollTop)
   },

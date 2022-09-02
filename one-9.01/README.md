@@ -129,5 +129,101 @@ activated() {
  }
 ```
 
-## 首页静态布局
+## 首页JS动态效果
+
+### 1.顶部header颜色变化
+
+```javascript
+<div :class="{ header: true, scroll: isScrollTop }">
+              <div class="classify-icon"></div>
+              <div class="search-wrap">
+                <div class="search-icon"></div>
+                <div class="text">请输入宝贝名称</div>
+              </div>
+              <div class="login">登录</div>
+</div>
+....
+data() {
+    return {
+      isScrollTop: false
+    }
+  },
+created() {
+    //isScroll确保事件只执行一次
+    this.isScroll = true
+    window.addEventListener('scroll', this.eventScrollTop)
+},
+methods: {
+    eventScrollTop() {
+      let scrollTop =document.body.scrollTop || document.documentElement.scrollTop
+      if (scrollTop >= 150) {
+        if (this.isScroll) {
+          console.log(true)
+          this.isScroll = false
+          this.isScrollTop = true
+        }
+      } else {
+        if (!this.isScroll) {
+          console.log(false)
+          this.isScroll = true
+          this.isScrollTop = false
+        }
+      }
+    }
+  },
+//当我们离开这个页面的时候，便会调用这个函数
+destroyed() {
+    window.removeEventListener('scroll', this.eventScrollTop)
+  },
+//keep-alive进入时触发
+activated() {
+    this.isScroll = true
+    window.addEventListener('scroll', this.eventScrollTop)
+  },
+//keep-alive离开时触发
+deactivated() {
+    window.removeEventListener('scroll', this.eventScrollTop)
+  }
+```
+
+难点：1.单页面应用在离开页面时要移除事件，当组件有keepAlive缓存时，在进入和离开时都要绑定或是移除事件
+
+​			2.确保滚动事件只执行一次，把变量定义在created()钩子函数里面
+
+### 2.轮播图  swiper
+
+文件导入：@import '../../../assets/css/common/swiper.css';  导入css一定要加@
+
+​				import Swiper from '../../../assets/js/libs/swiper'   导入js
+
+```javascript
+<div class="banner-wrap">
+      <div class="swiper-container" ref="swiper-container">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <img src="//vueshop.glbuys.com/uploadfiles/1484285302.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="//vueshop.glbuys.com/uploadfiles/1484285334.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="//vueshop.glbuys.com/uploadfiles/1524206455.jpg" alt="" />
+          </div>
+        </div>
+        <div class="swiper-pagination" ref="swiper-pagination"></div>
+      </div>
+ </div> 
+
+//有关DOM操作放在mounted()里面
+  mounted() {
+    new Swiper(this.$refs['swiper-container'], {
+      autoplay: 3000,
+      pagination: this.$refs['swiper-pagination'],
+      paginationClickable: true,
+      autoplayDisableOnInteraction: false
+    })
+  },
+```
+
+使用$refs时，在HTML标签里面要添加  ref="类名"   `ref="swiper-pagination"`
 
